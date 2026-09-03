@@ -108,16 +108,26 @@ public class YouTubeAccount implements Account {
     public boolean equals(Object obj) {
         if (obj instanceof YouTubeAccount) {
             YouTubeAccount account = (YouTubeAccount) obj;
+            String email = account.getEmail();
+            String myEmail = getEmail();
+
+            // MOD: The email is the stable account identifier. When both accounts have it,
+            // treat a matching email as the same account regardless of name/channel differences,
+            // so re-fetched accounts merge instead of creating duplicate entries.
+            if (email != null && myEmail != null && Helpers.equals(email, myEmail)) {
+                return true;
+            }
+
             String token = account.getRefreshToken();
             String pageId = account.getPageIdToken();
             String name = account.getName();
-            String email = account.getEmail();
             String channel = account.getChannelName();
             boolean tokenEquals = Helpers.equals(token, getRefreshToken());
             boolean pageIdEquals = Helpers.equals(pageId, getPageIdToken());
             boolean nameEquals = Helpers.equals(name, getName());
             boolean emailEquals = email == null || getEmail() == null || Helpers.equals(email, getEmail());
             boolean channelEquals = channel == null || getChannelName() == null || Helpers.equals(channel, getChannelName());
+
             return (tokenEquals && pageIdEquals) || (nameEquals && emailEquals && channelEquals);
         }
 
